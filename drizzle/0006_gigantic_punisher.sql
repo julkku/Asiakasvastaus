@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `registration_ip_hash_unique` ON `registration_ip_limits` (`ip_hash`);

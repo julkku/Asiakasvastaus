@@ -1,0 +1,55 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1766148090404,
+      "tag": "0000_optimal_mach_iv",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1766158416827,
+      "tag": "0001_outstanding_infant_terrible",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1766161080000,
+      "tag": "0002_subscription_early_bird",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1766162800000,
+      "tag": "0003_trial_abuse_guards",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1766165200000,
+      "tag": "0004_org_profile_v2",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1766653495967,
+      "tag": "0005_fantastic_sunspot",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1766833119480,
+      "tag": "0006_gigantic_punisher",
+      "breakpoints": true
+    }
+  ]
+}
