@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { getOrganizationProfile } from "@/lib/organization";
 import { requireUser } from "@/lib/auth";
