@@ -19,8 +19,27 @@ function createDb() {
     databaseUrl.startsWith("postgres://") ||
     databaseUrl.startsWith("postgresql://")
   ) {
-    const sql = neon(databaseUrl);
-    return drizzleNeon(sql, { schema: schema as any });
+    const neonSql = neon(databaseUrl);
+    const sqlCompat = ((first: any, second?: any, third?: any) => {
+      if (typeof first === "string") {
+        const query = first;
+        const params = Array.isArray(second) ? second : [];
+        const options = third;
+        return (neonSql as any).query(query, params, options);
+      }
+
+      return (neonSql as any)(
+        first,
+        ...(Array.isArray(second) ? second : []),
+      );
+    }) as any;
+
+    (sqlCompat as any).query = (neonSql as any).query?.bind(neonSql);
+    (sqlCompat as any).transaction = (neonSql as any).transaction?.bind(
+      neonSql,
+    );
+
+    return drizzleNeon(sqlCompat, { schema: schema as any });
   }
 
   if (env.NODE_ENV === "production" && process.env.VERCEL) {
