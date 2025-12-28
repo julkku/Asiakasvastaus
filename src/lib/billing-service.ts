@@ -3,7 +3,7 @@ import "server-only";
 import { nanoid } from "nanoid";
 import { eq } from "drizzle-orm";
 
-import { db } from "@/db/client";
+import { getDb } from "@/db/client";
 import { organizationProfiles, stripeEvents } from "@/db/schema";
 import { stripeClient, appUrl } from "@/lib/stripe";
 
@@ -14,6 +14,7 @@ export async function getOrCreateStripeCustomer({
   billingEntityId: string;
   email?: string | null;
 }) {
+  const db = getDb();
   const entity = await db.query.organizationProfiles.findFirst({
     where: eq(organizationProfiles.id, billingEntityId),
   });
@@ -97,6 +98,7 @@ export async function createBillingPortalSession({
 }
 
 export async function markStripeEventProcessed(eventId: string) {
+  const db = getDb();
   try {
     await db.insert(stripeEvents).values({
       id: nanoid(),

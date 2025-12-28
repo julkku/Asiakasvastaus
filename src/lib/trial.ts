@@ -4,7 +4,7 @@ import "server-only";
 
 import { eq } from "drizzle-orm";
 
-import { db } from "@/db/client";
+import { getDb } from "@/db/client";
 import { users } from "@/db/schema";
 
 const TRIAL_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
@@ -17,6 +17,7 @@ export type TrialStatus = {
 };
 
 export async function startTrialForUser(userId: string) {
+  const db = getDb();
   const now = Date.now();
   await db
     .update(users)
@@ -28,6 +29,7 @@ export async function startTrialForUser(userId: string) {
 }
 
 export async function getTrialStatus(userId: string): Promise<TrialStatus> {
+  const db = getDb();
   const user = await db.query.users.findFirst({
     where: eq(users.id, userId),
     columns: {

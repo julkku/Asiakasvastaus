@@ -4,7 +4,7 @@ import "server-only";
 
 import { nanoid } from "nanoid";
 
-import { db } from "@/db/client";
+import { getDb } from "@/db/client";
 import { auditEvents } from "@/db/schema";
 
 export async function createAuditEvent({
@@ -16,6 +16,7 @@ export async function createAuditEvent({
   type: string;
   metadata: Record<string, unknown>;
 }) {
+  const db = getDb();
   await db.insert(auditEvents).values({
     id: nanoid(),
     userId,

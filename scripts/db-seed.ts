@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
-import { db } from "../src/db/client";
+import { getDb } from "../src/db/client";
 import { templates } from "../src/db/schema";
 
 type TemplateField = {
@@ -398,6 +398,7 @@ const templateSeeds: TemplateSeed[] = [
 ];
 
 async function seedTemplates() {
+  const db = getDb();
   for (const seed of templateSeeds) {
     const existing = await db.query.templates.findFirst({
       where: eq(templates.key, seed.key),

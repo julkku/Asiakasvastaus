@@ -7,7 +7,8 @@ AI-ohjattu, Windows-ystävällinen **Next.js 14 / App Router** -projekti, joka t
 ## Tech Stack
 
 - Next.js 14 (App Router) with TypeScript and Tailwind CSS (no middleware required)
-- SQLite (`dev.db`) accessed through Better SQLite3 + Drizzle ORM
+- SQLite (`dev.db`) accessed through Better SQLite3 + Drizzle ORM (dev)
+- Production requires Postgres (e.g. Neon) via `DATABASE_URL`
 - Custom auth helpers with bcrypt hashing, session HMACs (SHA-256), and DB-stored sessions
 - Server Actions for register/login, protected layouts for `/app/*` and `/onboarding`
 

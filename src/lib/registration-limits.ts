@@ -3,7 +3,7 @@ import "server-only";
 import { nanoid } from "nanoid";
 import { eq } from "drizzle-orm";
 
-import { db } from "@/db/client";
+import { getDb } from "@/db/client";
 import { registrationIpLimits } from "@/db/schema";
 import { hmacSha256 } from "@/lib/security";
 
@@ -11,6 +11,7 @@ const WINDOW_MS = 24 * 60 * 60 * 1000;
 const MAX_PER_WINDOW = 3;
 
 export async function checkRegistrationThrottle(ip: string | null) {
+  const db = getDb();
   if (!ip) {
     return { allowed: true };
   }

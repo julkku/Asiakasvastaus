@@ -5,8 +5,21 @@ import "server-only";
 import { and, desc, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
-import { db } from "@/db/client";
+import { getDb } from "@/db/client";
 import { drafts, templates } from "@/db/schema";
+
+export type DraftListItem = {
+  id: string;
+  createdAt: number;
+  output: string;
+  model: string;
+  templateTitle: string;
+  templateKey: string;
+};
+
+export type DraftDetail = DraftListItem & {
+  input: string;
+};
 
 export async function createDraft({
   userId,
@@ -21,6 +34,7 @@ export async function createDraft({
   output: string;
   model: string;
 }) {
+  const db = getDb();
   const id = nanoid();
   await db.insert(drafts).values({
     id,
@@ -35,6 +49,7 @@ export async function createDraft({
 }
 
 export async function getDraftsForUser(userId: string) {
+  const db = getDb();
   return db
     .select({
       id: drafts.id,
@@ -47,10 +62,11 @@ export async function getDraftsForUser(userId: string) {
     .from(drafts)
     .innerJoin(templates, eq(drafts.templateId, templates.id))
     .where(eq(drafts.userId, userId))
-    .orderBy(desc(drafts.createdAt));
+    .orderBy(desc(drafts.createdAt)) as Promise<DraftListItem[]>;
 }
 
 export async function getDraftById(userId: string, draftId: string) {
+  const db = getDb();
   const [result] = await db
     .select({
       id: drafts.id,
@@ -65,5 +81,5 @@ export async function getDraftById(userId: string, draftId: string) {
     .innerJoin(templates, eq(drafts.templateId, templates.id))
     .where(and(eq(drafts.userId, userId), eq(drafts.id, draftId)));
 
-  return result ?? null;
+  return (result ?? null) as DraftDetail | null;
 }

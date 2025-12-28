@@ -4,7 +4,7 @@ import { nanoid } from "nanoid";
 import { eq } from "drizzle-orm";
 import { randomBytes } from "node:crypto";
 
-import { db } from "@/db/client";
+import { getDb } from "@/db/client";
 import { emailVerificationTokens, users } from "@/db/schema";
 import { hmacSha256 } from "@/lib/security";
 import { sendEmail } from "@/lib/mailer";
@@ -16,6 +16,7 @@ const DEFAULT_APP_URL = "http://localhost:3000";
 const TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 
 export async function createEmailVerification(userId: string, email: string) {
+  const db = getDb();
   const rawToken = randomBytes(32).toString("hex");
   const tokenHash = hmacSha256(rawToken);
   const now = Date.now();
@@ -45,6 +46,7 @@ export async function createEmailVerification(userId: string, email: string) {
 }
 
 export async function verifyEmailToken(rawToken: string) {
+  const db = getDb();
   const tokenHash = hmacSha256(rawToken);
   const now = Date.now();
 
@@ -69,6 +71,7 @@ export async function verifyEmailToken(rawToken: string) {
 }
 
 export async function getEmailVerificationStatus(userId: string) {
+  const db = getDb();
   const user = await db.query.users.findFirst({
     where: eq(users.id, userId),
     columns: { emailVerifiedAt: true },
@@ -77,6 +80,7 @@ export async function getEmailVerificationStatus(userId: string) {
 }
 
 export async function resendVerificationEmail(email: string) {
+  const db = getDb();
   const user = await db.query.users.findFirst({
     where: eq(users.email, email),
   });

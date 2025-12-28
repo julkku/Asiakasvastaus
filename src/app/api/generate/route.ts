@@ -9,7 +9,7 @@ import {
   getOpenAIClient,
 } from "@/lib/ai/generateReply";
 import { getOrganizationProfile } from "@/lib/organization";
-import { getTemplateByKey } from "@/lib/templates";
+import { getTemplateByKey, type TemplateField } from "@/lib/templates";
 import { getUserFromSessionCookie } from "@/lib/auth";
 import {
   assertCanGenerate,
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
   }
 
   const missingField = template.fields.find(
-    (field) =>
+    (field: TemplateField) =>
       field.required &&
       (typeof input?.[field.key] !== "string" || !input?.[field.key]?.trim()),
   );

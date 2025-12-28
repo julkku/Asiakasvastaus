@@ -12,6 +12,7 @@
     "db:seed": "tsx -r dotenv/config scripts/db-seed.ts"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^11.10.0",
     "drizzle-orm": "^0.36.1",

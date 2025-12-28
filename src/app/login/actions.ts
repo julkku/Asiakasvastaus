@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { cookies } from "next/headers";
 
-import { db } from "@/db/client";
+import { getDb } from "@/db/client";
 import { users } from "@/db/schema";
 import {
   createSession,
@@ -82,6 +82,7 @@ export async function registerAction(_: ActionState, formData: FormData) {
     return { error: turnstile.error ?? "CAPTCHA epäonnistui." };
   }
 
+  const db = getDb();
   const existingUser = await db.query.users.findFirst({
     where: eq(users.email, email),
   });
@@ -153,6 +154,7 @@ export async function loginAction(_: ActionState, formData: FormData) {
 
   const { email, password } = parsed.data;
 
+  const db = getDb();
   const user = await db.query.users.findFirst({
     where: eq(users.email, email),
   });

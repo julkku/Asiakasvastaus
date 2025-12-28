@@ -2,7 +2,7 @@ import "server-only";
 
 import { eq } from "drizzle-orm";
 
-import { db } from "@/db/client";
+import { getDb } from "@/db/client";
 import { organizationProfiles } from "@/db/schema";
 import { env } from "@/env";
 import { getStripe } from "@/lib/stripe";
@@ -22,6 +22,7 @@ export function getAppUrl() {
 }
 
 export async function getBillingEntityForUser(userId: string) {
+  const db = getDb();
   const profile = await db.query.organizationProfiles.findFirst({
     where: eq(organizationProfiles.userId, userId),
   });
@@ -69,6 +70,7 @@ export async function getOrCreateCustomer({
 }
 
 export async function findBillingEntityByCustomerId(customerId: string) {
+  const db = getDb();
   const profile = await db.query.organizationProfiles.findFirst({
     where: eq(organizationProfiles.stripeCustomerId, customerId),
   });
@@ -97,6 +99,7 @@ export async function updateBillingEntity(
     | "currentPeriodEnd"
   >>,
 ) {
+  const db = getDb();
   await db
     .update(organizationProfiles)
     .set({

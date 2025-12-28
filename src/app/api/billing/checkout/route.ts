@@ -1,5 +1,3 @@
-"use server";
-
 import { NextResponse } from "next/server";
 
 import { requireUser } from "@/lib/auth";
@@ -12,6 +10,9 @@ import {
 } from "@/lib/billing-service";
 import { getBillingEntityForUser } from "@/lib/billing";
 import { hasActiveSubscription } from "@/lib/subscription";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export async function POST() {
   if (!isStripeConfigured() || !env.STRIPE_PRICE_ID) {

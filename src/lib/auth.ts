@@ -9,7 +9,7 @@ import { redirect } from "next/navigation";
 import { nanoid } from "nanoid";
 import { createHmac, randomBytes } from "node:crypto";
 
-import { db } from "@/db/client";
+import { getDb } from "@/db/client";
 import { env } from "@/env";
 import { sessions, users } from "@/db/schema";
 
@@ -39,6 +39,7 @@ export async function verifyPassword(password: string, hash: string) {
 }
 
 export async function createSession(userId: string) {
+  const db = getDb();
   const token = randomBytes(32).toString("hex");
   const tokenHash = hashToken(token);
   const now = Date.now();
@@ -56,11 +57,13 @@ export async function createSession(userId: string) {
 }
 
 export async function deleteSessionByToken(token: string) {
+  const db = getDb();
   const tokenHash = hashToken(token);
   await db.delete(sessions).where(eq(sessions.tokenHash, tokenHash));
 }
 
 export async function getUserFromSessionCookie() {
+  const db = getDb();
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
   if (!token) {

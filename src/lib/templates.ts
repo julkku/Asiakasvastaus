@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { db } from "@/db/client";
-import { templates } from "@/db/schema";
+import { getDb } from "@/db/client";
+import { templates, type Template } from "@/db/schema";
 
 const formFieldSchema = z.object({
   key: z.string().min(1),
@@ -58,16 +58,17 @@ function parseFields(formSchema: string) {
   return parsed.data;
 }
 
-export async function getAllTemplates() {
+export async function getAllTemplates(): Promise<TemplateWithFields[]> {
+  const db = getDb();
   const result = await db
     .select()
     .from(templates)
     .orderBy(templates.title);
 
-  const parsed = result.map<TemplateWithFields>((template) => ({
+  const parsed = (result as Template[]).map((template) => ({
     ...template,
     fields: parseFields(template.formSchema),
-  }));
+  })) as TemplateWithFields[];
 
   return parsed.sort((first, second) => {
     const firstIndex = templateOrderIndex.get(first.key);
@@ -85,7 +86,10 @@ export async function getAllTemplates() {
   });
 }
 
-export async function getTemplateByKey(key: string) {
+export async function getTemplateByKey(
+  key: string,
+): Promise<TemplateWithFields | null> {
+  const db = getDb();
   if (typeof key !== "string") {
     return null;
   }
@@ -99,15 +103,18 @@ export async function getTemplateByKey(key: string) {
   if (!template) {
     return null;
   }
-  return { ...template, fields: parseFields(template.formSchema) };
+  return { ...template, fields: parseFields(template.formSchema) } as TemplateWithFields;
 }
 
-export async function getTemplateById(id: string) {
+export async function getTemplateById(
+  id: string,
+): Promise<TemplateWithFields | null> {
+  const db = getDb();
   const template = await db.query.templates.findFirst({
     where: eq(templates.id, id),
   });
   if (!template) {
     return null;
   }
-  return { ...template, fields: parseFields(template.formSchema) };
+  return { ...template, fields: parseFields(template.formSchema) } as TemplateWithFields;
 }

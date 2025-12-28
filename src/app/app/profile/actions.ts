@@ -11,7 +11,7 @@ import {
   getDevEmailVerificationMode,
   isDevEmailVerificationEnabled,
 } from "@/lib/dev-email-verification";
-import { db } from "@/db/client";
+import { getDb } from "@/db/client";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
@@ -64,7 +64,11 @@ export async function devVerifyNowAction(): Promise<DevVerificationState> {
   }
 
   const now = Date.now();
-  await db.update(users).set({ emailVerifiedAt: now }).where(eq(users.id, user.id));
+  const db = getDb();
+  await db
+    .update(users)
+    .set({ emailVerifiedAt: now })
+    .where(eq(users.id, user.id));
 
   return { success: "Sähköposti vahvistettu (DEV)." };
 }
