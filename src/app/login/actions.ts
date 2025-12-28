@@ -42,17 +42,17 @@ function getValue(formData: FormData, key: string) {
 
 const registerSchema = z.object({
   name: z.string().trim().max(120).optional(),
-  email: z.string().email("Enter a valid email address").toLowerCase(),
+  email: z.string().email("Anna kelvollinen sähköpostiosoite").toLowerCase(),
   password: z
     .string()
-    .min(8, "Password must be at least 8 characters long")
-    .max(128, "Password must be at most 128 characters long"),
+    .min(8, "Salasanan pitää olla vähintään 8 merkkiä pitkä")
+    .max(128, "Salasana saa olla enintään 128 merkkiä pitkä"),
   turnstileToken: z.string().optional(),
 });
 
 const loginSchema = z.object({
-  email: z.string().email("Enter a valid email address").toLowerCase(),
-  password: z.string().min(8, "Password must be at least 8 characters long"),
+  email: z.string().email("Anna kelvollinen sähköpostiosoite").toLowerCase(),
+  password: z.string().min(8, "Salasanan pitää olla vähintään 8 merkkiä pitkä"),
 });
 
 export async function registerAction(_: ActionState, formData: FormData) {
@@ -64,7 +64,7 @@ export async function registerAction(_: ActionState, formData: FormData) {
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
+    return { error: parsed.error.issues[0]?.message ?? "Virheellinen syöte." };
   }
 
   const { email, name, password, turnstileToken } = parsed.data;
@@ -88,7 +88,7 @@ export async function registerAction(_: ActionState, formData: FormData) {
   });
 
   if (existingUser) {
-    return { error: "That email is already registered." };
+    return { error: "Sähköposti on jo rekisteröity." };
   }
 
   const passwordHash = await hashPassword(password);
@@ -149,7 +149,9 @@ export async function loginAction(_: ActionState, formData: FormData) {
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid credentials." };
+    return {
+      error: parsed.error.issues[0]?.message ?? "Virheelliset tunnukset.",
+    };
   }
 
   const { email, password } = parsed.data;
@@ -160,12 +162,12 @@ export async function loginAction(_: ActionState, formData: FormData) {
   });
 
   if (!user) {
-    return { error: "Invalid email or password." };
+    return { error: "Virheellinen sähköposti tai salasana." };
   }
 
   const passwordValid = await verifyPassword(password, user.passwordHash);
   if (!passwordValid) {
-    return { error: "Invalid email or password." };
+    return { error: "Virheellinen sähköposti tai salasana." };
   }
 
   const session = await createSession(user.id);

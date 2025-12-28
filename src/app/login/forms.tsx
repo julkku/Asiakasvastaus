@@ -59,48 +59,48 @@ export function AuthForms({ turnstileSiteKey }: { turnstileSiteKey: string }) {
             Asiakasvastaus
           </p>
           <h1 className="text-3xl font-semibold text-slate-900">
-            Sign in or create your account
+            Kirjaudu sisään tai luo tili
           </h1>
           <p className="text-sm text-slate-600">
-            Access the private app area with your email and password.
+            Pääset sovellukseen sähköpostilla ja salasanalla.
           </p>
         </header>
 
         <div className="grid gap-6 md:grid-cols-2">
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-slate-900">
-              Create an account
+              Luo tili
             </h2>
             <p className="mb-4 text-sm text-slate-600">
-              New here? Register to get started.
+              Uusi käyttäjä? Rekisteröidy tästä.
             </p>
             <form action={registerFormAction} className="space-y-4">
               <div>
                 <label className="text-sm font-semibold text-slate-900">
-                  Name <span className="text-slate-400">(optional)</span>
+                  Nimi <span className="text-slate-400">(valinnainen)</span>
                 </label>
                 <input
                   name="name"
                   type="text"
-                  placeholder="Ada Lovelace"
+                  placeholder="Esim. Ada Lovelace"
                   className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:border-slate-900 focus:outline-none"
                 />
               </div>
               <div>
                 <label className="text-sm font-semibold text-slate-900">
-                  Email
+                  Sähköposti
                 </label>
                 <input
                   name="email"
                   type="email"
                   required
-                  placeholder="you@example.com"
+                  placeholder="nimi@esimerkki.fi"
                   className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:border-slate-900 focus:outline-none"
                 />
               </div>
               <div>
                 <label className="text-sm font-semibold text-slate-900">
-                  Password
+                  Salasana
                 </label>
                 <input
                   name="password"
@@ -119,7 +119,7 @@ export function AuthForms({ turnstileSiteKey }: { turnstileSiteKey: string }) {
                 </div>
               ) : (
                 <p className="text-xs text-slate-500">
-                  CAPTCHA ei ole käytössä tässä ympäristössä.
+                  
                 </p>
               )}
               {registerState?.error && (
@@ -138,7 +138,7 @@ export function AuthForms({ turnstileSiteKey }: { turnstileSiteKey: string }) {
                   ) : null}
                 </div>
               )}
-              <SubmitButton label="Create account" />
+              <SubmitButton label="Luo tili" />
             </form>
 
             {registerState?.success ? (
@@ -169,26 +169,28 @@ export function AuthForms({ turnstileSiteKey }: { turnstileSiteKey: string }) {
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-slate-900">Log in</h2>
+            <h2 className="text-lg font-semibold text-slate-900">
+              Kirjaudu sisään
+            </h2>
             <p className="mb-4 text-sm text-slate-600">
-              Already have access? Sign in below.
+              Onko sinulla jo tili? Kirjaudu tästä.
             </p>
             <form action={loginFormAction} className="space-y-4">
               <div>
                 <label className="text-sm font-semibold text-slate-900">
-                  Email
+                  Sähköposti
                 </label>
                 <input
                   name="email"
                   type="email"
                   required
-                  placeholder="you@example.com"
+                  placeholder="nimi@esimerkki.fi"
                   className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:border-slate-900 focus:outline-none"
                 />
               </div>
               <div>
                 <label className="text-sm font-semibold text-slate-900">
-                  Password
+                  Salasana
                 </label>
                 <input
                   name="password"
@@ -203,15 +205,22 @@ export function AuthForms({ turnstileSiteKey }: { turnstileSiteKey: string }) {
                   {loginState.error}
                 </p>
               )}
-              <SubmitButton label="Sign in" />
+              <SubmitButton label="Kirjaudu sisään" />
             </form>
             <p className="mt-4 text-xs text-slate-500">
-              By continuing you agree to the{" "}
+              Jatkamalla hyväksyt{" "}
               <Link
-                href="#"
+                href="/terms"
                 className="font-medium text-slate-900 underline-offset-2 hover:underline"
               >
-                Terms of Service
+                käyttöehdot
+              </Link>{" "}
+              ja{" "}
+              <Link
+                href="/privacy"
+                className="font-medium text-slate-900 underline-offset-2 hover:underline"
+              >
+                tietosuojaselosteen
               </Link>
               .
             </p>
