@@ -1,10 +1,11 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import { getOrganizationProfile } from "@/lib/organization";
 import { requireUser } from "@/lib/auth";
 import { getTemplateByKey } from "@/lib/templates";
 import { TemplateFormClient } from "./TemplateFormClient";
 import { getEntitlementSummary } from "@/lib/entitlement";
+import { trackEvent } from "@/lib/usageEvents";
 
 export default async function TemplateFormPage({
   params,
@@ -28,14 +29,17 @@ export default async function TemplateFormPage({
   }
 
   const entitlement = await getEntitlementSummary(user.id);
-  if (!entitlement.isEntitled) {
-    redirect("/pricing");
-  }
   const clientEntitlement = {
     isEntitled: entitlement.isEntitled,
     trialStatus: entitlement.trial,
     isEmailVerified: entitlement.emailStatus.isVerified,
   };
+
+  void trackEvent({
+    eventName: "card_clicked",
+    userId: user.id,
+    context: { cardKey: template.key },
+  });
 
   return (
     <TemplateFormClient

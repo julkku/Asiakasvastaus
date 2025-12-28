@@ -16,6 +16,7 @@ import {
   isEmailNotVerifiedError,
   isPaywallError,
 } from "@/lib/entitlement";
+import { trackEvent } from "@/lib/usageEvents";
 
 const requestSchema = z.object({
   templateKey: z.string().min(1),
@@ -88,6 +89,13 @@ export async function POST(request: Request) {
     });
   }
 
+  void trackEvent({
+    eventName: "template_used",
+    userId: user.id,
+    context: { templateKey: template.key },
+  });
+  void trackEvent({ eventName: "response_created", userId: user.id });
+
   const encoder = new TextEncoder();
   const client = await getOpenAIClient();
   const defaultModel = await getDefaultModel();
@@ -108,6 +116,7 @@ export async function POST(request: Request) {
       };
 
       try {
+        send("status", { state: "starting" });
         const responseStream = await client.responses.stream({
           model: defaultModel,
           input: messages,

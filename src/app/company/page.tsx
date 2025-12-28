@@ -11,23 +11,27 @@ export default function CompanyPage() {
             Asiakasvastaus
           </p>
           <h1 className="mt-2 text-3xl font-semibold text-slate-900">
-            Yrityksen tiedot
+            Yritystiedot
           </h1>
-          <p className="mt-3 text-sm text-slate-600">
-            Tämä on luonnos, päivitetään ennen julkaisua.
-          </p>
 
           <div className="mt-6 space-y-3 text-sm text-slate-700">
             <p>
-              Yrityksen viralliset tiedot päivitetään tähän ennen julkaisua.
+              Palvelun käyttöä koskevat ehdot löytyvät käyttöehdoista ja
+              henkilötietojen käsittely tietosuojaselosteesta.
+            </p>
+            <p>
+              Palvelu: Asiakasvastaus
             </p>
             <p>
               Yhteys:{" "}
-              <a className="font-medium underline" href="mailto:hello@asiakasvastaus.fi">
-                hello@asiakasvastaus.fi
+              <a className="font-medium underline" href="mailto:info@asiakasvastaus.fi">
+                info@asiakasvastaus.fi
               </a>
               .
             </p>
+            <p>Y-tunnus: 3581511-1</p>
+            <p>Osoite: Kuoppamäenkuja 3 B 11, 20400 Turku</p>
+            <p>Yhteydenotot ensisijaisesti sähköpostitse.</p>
           </div>
         </div>
       </div>

@@ -5,7 +5,7 @@ import { requireUser } from "@/lib/auth";
 import { getEntitlementSummary } from "@/lib/entitlement";
 
 const navLinks = [
-  { href: "/app/new", label: "Uusi" },
+  { href: "/app/new", label: "Uusi vastaus" },
   { href: "/app/history", label: "Tallennetut" },
   { href: "/app/profile", label: "Profiili" },
 ];
@@ -23,12 +23,12 @@ export default async function AppLayout({
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-base font-semibold text-slate-900">
+            <Link href="/app/new" className="group">
+              <p className="text-base font-semibold text-slate-900 transition group-hover:text-slate-700">
                 Asiakasvastaus
               </p>
               <p className="text-sm text-slate-500">{user.email}</p>
-            </div>
+            </Link>
 
             <nav className="flex flex-wrap items-center gap-3 text-sm font-medium text-slate-600">
               {navLinks.map((link) => (
@@ -56,7 +56,7 @@ export default async function AppLayout({
                 </span>
               ) : (
                 <Link
-                  href="/pricing"
+                  href="/pricing?from=profile"
                   className="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2 py-1 text-xs font-medium text-red-700 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-200 focus:ring-offset-2"
                 >
                   Tilaa

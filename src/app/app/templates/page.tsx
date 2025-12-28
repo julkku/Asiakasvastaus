@@ -1,18 +1,19 @@
 import { getAllTemplates } from "@/lib/templates";
 import { requireUser } from "@/lib/auth";
 import { getEntitlementSummary } from "@/lib/entitlement";
-import { redirect } from "next/navigation";
 
 export default async function TemplatesPage() {
   const user = await requireUser();
   const entitlement = await getEntitlementSummary(user.id);
-  if (!entitlement.isEntitled) {
-    redirect("/pricing");
-  }
   const templateList = await getAllTemplates();
 
   return (
     <div className="space-y-6">
+      {!entitlement.isEntitled ? (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+          Käyttö vaatii aktiivisen tilauksen. Tilaa profiilista jatkaaksesi.
+        </div>
+      ) : null}
       <div>
         <h1 className="text-3xl font-semibold text-slate-900">
           Mallipohjat

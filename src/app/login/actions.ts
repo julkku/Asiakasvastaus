@@ -21,6 +21,8 @@ import { isTrialDeviceKnown, recordTrialDevice } from "@/lib/trial-device";
 import { createEmailVerification, resendVerificationEmail } from "@/lib/email-verification";
 import { randomBytes } from "node:crypto";
 import { env } from "@/env";
+import { trackEvent } from "@/lib/usageEvents";
+import { getEntitlementSummary } from "@/lib/entitlement";
 
 export type ActionState = {
   error?: string;
@@ -111,7 +113,7 @@ export async function registerAction(_: ActionState, formData: FormData) {
   const isDeviceKnown = await isTrialDeviceKnown(deviceId);
   const trialStartsAt = now;
   const trialEndsAt = !isDeviceKnown
-    ? now + 7 * 24 * 60 * 60 * 1000
+    ? now + 3 * 24 * 60 * 60 * 1000
     : now;
 
   await db.insert(users).values({
@@ -173,7 +175,10 @@ export async function loginAction(_: ActionState, formData: FormData) {
   const session = await createSession(user.id);
   await setSessionCookie(session.token, session.expiresAt);
 
-  redirect("/app/new");
+  void trackEvent({ eventName: "user_logged_in", userId: user.id });
+
+  const entitlement = await getEntitlementSummary(user.id);
+  redirect(entitlement.isEntitled ? "/app/new" : "/app/profile");
 }
 
 export async function resendVerificationAction(_: ActionState, formData: FormData) {

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { getAllTemplates } from "@/lib/templates";
 import { getEntitlementSummary } from "@/lib/entitlement";
-import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -12,10 +11,6 @@ export default async function NewDraftPage() {
   const user = await requireUser();
   const templateList = await getAllTemplates();
   const entitlement = await getEntitlementSummary(user.id);
-
-  if (!entitlement.isEntitled) {
-    redirect("/pricing");
-  }
 
   return (
     <div className="space-y-6">

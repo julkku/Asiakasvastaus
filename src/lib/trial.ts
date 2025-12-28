@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import { users } from "@/db/schema";
 
-const TRIAL_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
+const TRIAL_DURATION_MS = 3 * 24 * 60 * 60 * 1000;
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 export type TrialStatus = {
@@ -39,17 +39,21 @@ export async function getTrialStatus(userId: string): Promise<TrialStatus> {
   });
 
   const endsAt = user?.trialEndsAt ?? null;
-  if (!endsAt) {
-    return { isActive: true, daysLeft: 7, endsAt: null };
+  const startedAt = user?.trialStartedAt ?? null;
+  const derivedEndsAt =
+    !endsAt && startedAt ? startedAt + TRIAL_DURATION_MS : null;
+  const resolvedEndsAt = endsAt ?? derivedEndsAt;
+  if (!resolvedEndsAt) {
+    return { isActive: false, daysLeft: 0, endsAt: null };
   }
 
-  const remainingMs = endsAt - Date.now();
+  const remainingMs = resolvedEndsAt - Date.now();
   const daysLeft = Math.max(0, Math.ceil(remainingMs / DAY_IN_MS));
 
   return {
     isActive: remainingMs > 0,
     daysLeft,
-    endsAt,
+    endsAt: resolvedEndsAt,
   };
 }
 

@@ -452,11 +452,6 @@ export function TemplateFormClient({
           >
             {isSaving ? "Tallennetaan..." : "Tallenna vastaus"}
           </button>
-          {model ? (
-            <p className="text-center text-xs text-slate-500">
-              Malli: {model}
-            </p>
-          ) : null}
         </div>
       </div>
     </div>

@@ -129,6 +129,14 @@ export const auditEvents = sqliteTable("audit_events", {
   createdAt: integer("created_at", { mode: "number" }).notNull(),
 });
 
+export const usageEvents = sqliteTable("usage_events", {
+  id: text("id").primaryKey(),
+  eventName: text("event_name").notNull(),
+  userId: text("user_id"),
+  context: text("context"),
+  createdAt: integer("created_at", { mode: "number" }).notNull(),
+});
+
 export const stripeEvents = sqliteTable(
   "stripe_events",
   {
@@ -220,6 +228,7 @@ export type OrganizationProfile = typeof organizationProfiles.$inferSelect;
 export type Template = typeof templates.$inferSelect;
 export type Draft = typeof drafts.$inferSelect;
 export type AuditEvent = typeof auditEvents.$inferSelect;
+export type UsageEvent = typeof usageEvents.$inferSelect;
 export type StripeEvent = typeof stripeEvents.$inferSelect;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type EmailVerificationToken = typeof emailVerificationTokens.$inferSelect;

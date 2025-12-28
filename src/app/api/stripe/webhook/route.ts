@@ -10,6 +10,7 @@ import {
 } from "@/lib/billing";
 import { stripeClient } from "@/lib/stripe";
 import { markStripeEventProcessed } from "@/lib/billing-service";
+import { trackEvent } from "@/lib/usageEvents";
 
 export const runtime = "nodejs";
 
@@ -84,6 +85,24 @@ export async function POST(request: Request) {
           subscriptionId,
         );
         await applySubscriptionUpdate(subscription);
+        const customerId =
+          typeof session.customer === "string"
+            ? session.customer
+            : session.customer.id;
+        if (customerId) {
+          const billingEntity =
+            await findBillingEntityByCustomerId(customerId);
+          if (
+            billingEntity &&
+            (subscription.status === "active" ||
+              subscription.status === "trialing")
+          ) {
+            void trackEvent({
+              eventName: "subscription_started",
+              userId: billingEntity.userId,
+            });
+          }
+        }
         break;
       }
       case "customer.subscription.updated":

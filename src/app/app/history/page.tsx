@@ -3,7 +3,6 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { getDraftsForUser } from "@/lib/drafts";
 import { getEntitlementSummary } from "@/lib/entitlement";
-import { redirect } from "next/navigation";
 
 function formatDate(timestamp: number) {
   return new Date(timestamp).toLocaleString("fi-FI", {
@@ -15,15 +14,19 @@ function formatDate(timestamp: number) {
 export default async function HistoryPage() {
   const user = await requireUser();
   const entitlement = await getEntitlementSummary(user.id);
-  if (!entitlement.isEntitled) {
-    redirect("/pricing");
-  }
   const drafts = await getDraftsForUser(user.id);
 
   return (
     <div className="space-y-6">
+      {!entitlement.isEntitled ? (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+          Käyttö vaatii aktiivisen tilauksen. Tilaa profiilista jatkaaksesi.
+        </div>
+      ) : null}
       <div>
-        <h1 className="text-3xl font-semibold text-slate-900">Tallennetut vastaukset</h1>
+        <h1 className="text-3xl font-semibold text-slate-900">
+          Tallennetut vastaukset
+        </h1>
         <p className="text-sm text-slate-600">
           Viimeisimmät Asiakasvastaukset.
         </p>

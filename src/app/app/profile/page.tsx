@@ -58,7 +58,7 @@ export default async function ProfilePage({
           <div className="mt-4 flex flex-wrap items-center gap-3">
             {!entitlement.subscription.isActive ? (
               <a
-                href="/pricing"
+                href="/pricing?from=profile"
                 className="rounded-md bg-black px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-black/90"
               >
                 Tilaa

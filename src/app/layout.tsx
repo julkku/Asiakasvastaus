@@ -39,6 +39,9 @@ export default function RootLayout({
               <Link className="hover:text-slate-900" href="/company">
                 Yrityksen tiedot
               </Link>
+              <a className="hover:text-slate-900" href="mailto:info@asiakasvastaus.fi">
+                info@asiakasvastaus.fi
+              </a>
             </div>
           </footer>
         </div>
