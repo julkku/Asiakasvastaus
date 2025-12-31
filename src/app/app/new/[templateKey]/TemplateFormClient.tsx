@@ -39,6 +39,7 @@ const globalCustomerMessageField: TemplateField = {
 const customerMessageExcludedTemplates = new Set([
   "PERUUTUS_YRITYS",
   "VIRHE_YRITYS",
+  "HYVITYSPYYNTO",
 ]);
 
 function hasCustomerMessage(fields: TemplateField[]) {

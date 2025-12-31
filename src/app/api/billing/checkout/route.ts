@@ -30,7 +30,7 @@ export async function POST() {
 
   const profile = await getOrganizationProfile(user.id);
   if (!profile) {
-    return NextResponse.redirect(new URL("/onboarding", appUrl()));
+    return NextResponse.redirect(new URL("/onboarding", appUrl()), 303);
   }
 
   if (billingEntity?.stripeCustomerId) {

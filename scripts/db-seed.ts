@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
-import { getDb } from "../src/db/client";
+import { getDb, type DbClient } from "../src/db/client";
 import { templates } from "../src/db/schema";
 
 type TemplateField = {
@@ -103,20 +103,13 @@ const templateSeeds: TemplateSeed[] = [
       "Asiakas pyytää korvausta tai alennusta.",
     formSchema: [
       {
-        key: "customerMessage",
-        label: "Asiakkaan viesti (valinnainen)",
-        type: "textarea",
-        required: false,
-        helpText:
-          "Liitä asiakkaan alkuperäinen viesti, jos se on saatavilla. Voit jättää tyhjäksi.",
-      },
-      {
         key: "customerRequest",
-        label: "Tilanteen kuvaus (valinnainen)",
+        label: "Asiakkaan viesti / tilanteen kuvaus",
         type: "textarea",
         required: false,
         helpText:
-          "Kuvaa lyhyesti, mitä asiakas toivoo tai mitä on tapahtunut. Voit jättää tyhjäksi, jos liitit asiakkaan viestin.",
+          "Liitä tähän asiakkaan alkuperäinen viesti tai kuvaa tilanne omin sanoin, jos suoraa viestiä ei ole.",
+        placeholder: "Esim. asiakkaan sähköposti tai chat-viesti…",
       },
       {
         key: "impact",
@@ -269,12 +262,6 @@ const templateSeeds: TemplateSeed[] = [
           "Kuvaa lyhyesti, mistä tyytymättömyys johtuu. Voit jättää tyhjäksi, jos liitit asiakkaan viestin.",
       },
       {
-        key: "rootCause",
-        label: "Taustatiedot",
-        type: "textarea",
-        placeholder: "Lyhyt selitys tilanteen syystä",
-      },
-      {
         key: "resolutionPlan",
         label: "Ratkaisuehdotus",
         type: "textarea",
@@ -369,7 +356,7 @@ const templateSeeds: TemplateSeed[] = [
         type: "textarea",
         required: false,
         helpText:
-          "Kuvaa lyhyesti tilanne omin sanoin. Voit jättää tämän tyhjäksi, jos asiakkaan viesti on jo liitetty.",
+          "Kuvaa lyhyesti tilanne omin sanoin tai liitä asiakkaan viesti.",
       },
       {
         key: "backgroundInfo",
@@ -398,7 +385,7 @@ const templateSeeds: TemplateSeed[] = [
 ];
 
 async function seedTemplates() {
-  const db = getDb();
+  const db: DbClient = getDb();
   for (const seed of templateSeeds) {
     const existing = await db.query.templates.findFirst({
       where: eq(templates.key, seed.key),

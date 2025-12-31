@@ -1,5 +1,7 @@
 import "server-only";
 
+import nodemailer from "nodemailer";
+
 import { env } from "@/env";
 
 type SendEmailParams = {
@@ -14,6 +16,16 @@ export async function sendEmail({ to, subject, text }: SendEmailParams) {
     return;
   }
 
-  console.warn("SMTP_URL configured but email transport not implemented.");
-  console.log("DEV_EMAIL", { to, subject, text });
+  try {
+    const transport = nodemailer.createTransport(env.SMTP_URL);
+    await transport.sendMail({
+      from: env.EMAIL_FROM,
+      to,
+      subject,
+      text,
+    });
+  } catch (error) {
+    console.error("SMTP send failed", error);
+    throw error;
+  }
 }

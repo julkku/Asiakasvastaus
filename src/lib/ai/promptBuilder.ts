@@ -92,9 +92,14 @@ export function buildPromptLayers({
   profile: OrganizationProfileInput;
   input: Record<string, string>;
 }): PromptLayers {
+  const effectiveCustomerMessage =
+    input.customerMessage?.trim() ||
+    (template.key === "HYVITYSPYYNTO" ? input.customerRequest?.trim() : "");
   const system = [
     "Olet seniori suomalainen asiakaspalveluasiantuntija.",
     "Vastaa aina suomeksi.",
+    "Älä tee kirjoitusvirheitä tai kielioppivirheitä.",
+    "Kirjoita sujuvaa, luonnollista suomen kieltä. Vältä turhaa virkamiesmäisyyttä ja kaavamaisia fraaseja. Säilytä kuitenkin asiallinen ja kohtelias asiakaspalvelun sävy.",
     "Älä käytä emojeja, markdownia tai analyysiä.",
     "Älä keksi faktoja.",
     "Älä lupaa hyvityksiä, korvauksia tai aikatauluja, ellei niitä ole annettu syötteissä.",
@@ -102,7 +107,10 @@ export function buildPromptLayers({
     "Älä syyllistä asiakasta tai yritystä.",
     "Vältä toistamasta ilmausta 'Ymmärrän, että...'. Käytä vaihtoehtoja kuten 'Olemme huomanneet', 'Tilanne on selvä', 'Kiitos viestistäsi', tai aloita suoraan asialla, erityisesti jämäkässä sävyssä.",
     "Vältä aloittamasta jokaista vastausta ilmauksella \"Ymmärrän\". Vaihtele aloitusta tilanteen mukaan (esim. \"Kiitos viestistä\", \"Kiitos palautteesta\", tai aloita suoraan asialla).",
-    "Pidä vastaus lyhyenä, selkeänä ja ammattimaisena.",
+    "Pidä vastaus järkevän mittaisena: tarpeeksi pitkä käsittelemään asia, mutta vältä tarpeetonta täytettä.",
+    "Päätä vastaus aina kokonaiseksi: viimeinen rivi on selkeä lopetus (esim. \"Ystävällisin terveisin ...\").",
+    "Älä jätä lausetta kesken.",
+    "Pidä vastaus selkeänä ja ammattimaisena.",
     "Jos asiakkaan viestiä ei ole annettu, kirjoita viesti puhtaana ilmoituksena.",
     "Älä kiitä yhteydenotosta tai pyydä vastausta, ellei se ole välttämätöntä.",
     "Yrityksen oma-aloitteisessa ilmoituksessa älä pyydä asiakkaalta välitöntä vastausta, ellei asiakasviestissä ole esitetty kysymystä.",
@@ -144,7 +152,7 @@ export function buildPromptLayers({
       ? "Käytä teitittelyä."
       : "Käytä sinuttelua.",
     toneGuidance(profile.defaultTone),
-    input.customerMessage?.trim()
+    effectiveCustomerMessage
       ? "Asiakkaan viesti on ensisijainen lähtökohta. Vastaa suoraan asiakkaan viestin sisältöön, pidä viesti tiiviinä ja ammattimaisena."
       : "Asiakkaan viestiä ei ole annettu. Laadi hyödyllinen vastaus annettujen taustatietojen perusteella äläkä viittaa puuttuvaan viestiin.",
     `Allekirjoitus: ${profile.signature}.`,

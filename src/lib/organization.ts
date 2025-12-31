@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 
-import { getDb } from "@/db/client";
+import { getDb, type DbClient } from "@/db/client";
 import { organizationProfiles } from "@/db/schema";
 import { ToneOption, toneOptions } from "@/lib/constants";
 import {
@@ -150,7 +150,7 @@ function normalizeIndustry(value: string | null | undefined): IndustryOption {
 }
 
 export async function getOrganizationProfile(userId: string) {
-  const db = getDb();
+  const db: DbClient = getDb();
   const profile = await db.query.organizationProfiles.findFirst({
     where: eq(organizationProfiles.userId, userId),
   });
@@ -192,7 +192,7 @@ export async function upsertOrganizationProfile(
   userId: string,
   data: OrganizationProfileInput,
 ) {
-  const db = getDb();
+  const db: DbClient = getDb();
   const now = Date.now();
   const existing = await getOrganizationProfile(userId);
   const forbiddenPhrases = parseForbiddenPhrases(data.forbiddenPhrases);

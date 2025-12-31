@@ -23,7 +23,37 @@ const requestSchema = z.object({
   input: z.record(z.any()),
 });
 
+const CONTINUATION_MAX_OUTPUT_TOKENS = 350;
+const CONTINUATION_TAIL_CHARS = 2000;
+
+function getMaxOutputTokens(templateKey: string) {
+  switch (templateKey) {
+    case "REKLAMAATIO_VIKA":
+      return 1100;
+    case "ASIAKAS_TYYTYMATON":
+      return 900;
+    default:
+      return 800;
+  }
+}
+
+function isLikelyTruncated(text: string) {
+  const trimmed = text.trimEnd();
+  if (!trimmed) {
+    return false;
+  }
+  if (/[.!?…]$/.test(trimmed)) {
+    return false;
+  }
+  const tail = trimmed.slice(-60);
+  if (/Ystävällisin terveisin/i.test(tail)) {
+    return false;
+  }
+  return /[a-zA-Z0-9äöåÄÖÅ]$/.test(trimmed);
+}
+
 export async function POST(request: Request) {
+  const t0 = Date.now();
   const user = await getUserFromSessionCookie();
   if (!user) {
     return new Response("Unauthorized", { status: 401 });
@@ -37,18 +67,22 @@ export async function POST(request: Request) {
     return new Response("Virheellinen pyyntö.", { status: 400 });
   }
 
-  const template = await getTemplateByKey(parsedBody.templateKey);
+  const templatePromise = getTemplateByKey(parsedBody.templateKey);
+  const profilePromise = getOrganizationProfile(user.id);
+  const entitlementPromise = assertCanGenerate(user.id);
+
+  const template = await templatePromise;
   if (!template) {
     return new Response("Mallipohjaa ei löytynyt.", { status: 404 });
   }
 
-  const profile = await getOrganizationProfile(user.id);
+  const profile = await profilePromise;
   if (!profile) {
     return new Response("Onboarding puuttuu.", { status: 400 });
   }
 
   try {
-    await assertCanGenerate(user.id);
+    await entitlementPromise;
   } catch (error) {
     if (await isEmailNotVerifiedError(error)) {
       return new Response(
@@ -97,16 +131,16 @@ export async function POST(request: Request) {
   void trackEvent({ eventName: "response_created", userId: user.id });
 
   const encoder = new TextEncoder();
-  const client = await getOpenAIClient();
-  const defaultModel = await getDefaultModel();
-  const messages = await buildResponseInput({
-    template,
-    profile,
-    input,
-  });
+  const [client, defaultModel, messages] = await Promise.all([
+    getOpenAIClient(),
+    getDefaultModel(),
+    buildResponseInput({ template, profile, input }),
+  ]);
 
   const stream = new ReadableStream({
     async start(controller) {
+      let loggedFirstChunk = false;
+      let loggedDone = false;
       const send = (event: string, data: unknown) => {
         controller.enqueue(
           encoder.encode(
@@ -114,40 +148,132 @@ export async function POST(request: Request) {
           ),
         );
       };
+      const logDone = () => {
+        if (loggedDone) {
+          return;
+        }
+        loggedDone = true;
+        const tDone = Date.now();
+        console.log("[generate] done ms:", tDone - t0);
+        console.log("[generate] total ms:", tDone - t0);
+      };
 
-      try {
-        send("status", { state: "starting" });
+      const streamResponse = async ({
+        inputMessages,
+        maxOutputTokens,
+      }: {
+        inputMessages: typeof messages;
+        maxOutputTokens: number;
+      }) => {
+        let text = "";
+        let finishReason: string | null = null;
+        let model: string | null = null;
+        let hadError = false;
         const responseStream = await client.responses.stream({
           model: defaultModel,
-          input: messages,
+          input: inputMessages,
+          max_output_tokens: maxOutputTokens,
+          reasoning: { effort: "low" },
         });
 
         for await (const event of responseStream) {
+          if (!loggedFirstChunk) {
+            loggedFirstChunk = true;
+            const tFirstChunk = Date.now();
+            console.log("[generate] first OpenAI chunk ms:", tFirstChunk - t0);
+          }
           if (event.type === "response.output_text.delta") {
+            text += event.delta ?? "";
             send("delta", { text: event.delta });
           } else if (event.type === "response.completed") {
-            send("done", {
-              model: event.response.model ?? defaultModel,
-            });
+            finishReason =
+              (event.response?.output?.[0] as { finish_reason?: string })
+                ?.finish_reason ??
+              (event.response as { finish_reason?: string })?.finish_reason ??
+              null;
+            model = event.response.model ?? defaultModel;
             responseStream.controller.abort();
-            controller.close();
-            return;
+            return { text, finishReason, model, hadError };
           } else if (event.type === "error") {
             send("error", {
               message: "Generointi epäonnistui. Yritä uudelleen.",
             });
+            hadError = true;
             responseStream.controller.abort();
-            controller.close();
-            return;
+            return { text, finishReason, model, hadError };
           }
         }
+        return { text, finishReason, model, hadError };
+      };
+
+      try {
+        send("status", { state: "starting" });
+        const tBeforeOpenAI = Date.now();
+        console.log("[generate] before OpenAI ms:", tBeforeOpenAI - t0);
+
+        const maxOutputTokens = getMaxOutputTokens(template.key);
+        const first = await streamResponse({
+          inputMessages: messages,
+          maxOutputTokens,
+        });
+        if (first.hadError) {
+          controller.close();
+          logDone();
+          return;
+        }
+
+        let didContinue = false;
+        let finalModel = first.model ?? defaultModel;
+        const needsContinuation =
+          first.finishReason === "length" ||
+          (!first.finishReason && isLikelyTruncated(first.text));
+
+        if (needsContinuation && first.text.trim().length > 0 && !didContinue) {
+          didContinue = true;
+          const tail = first.text.slice(-CONTINUATION_TAIL_CHARS);
+          const continuationMessages = [
+            ...messages,
+            {
+              role: "developer" as const,
+              content: [
+                {
+                  type: "input_text" as const,
+                  text: "Jatka täsmälleen siitä mihin teksti jäi. Älä toista aiempaa. Kirjoita loppuun ja päätä kohteliaaseen lopetukseen.",
+                },
+              ],
+            },
+            {
+              role: "user" as const,
+              content: [
+                {
+                  type: "input_text" as const,
+                  text: `Tässä on vastaus tähän asti:\n${tail}`,
+                },
+              ],
+            },
+          ];
+          const continued = await streamResponse({
+            inputMessages: continuationMessages,
+            maxOutputTokens: CONTINUATION_MAX_OUTPUT_TOKENS,
+          });
+          if (continued.hadError) {
+            controller.close();
+            logDone();
+            return;
+          }
+          finalModel = continued.model ?? finalModel;
+        }
+
+        send("done", { model: finalModel });
         controller.close();
+        logDone();
       } catch (error) {
         console.error("Streaming error", error);
         send("error", {
           message: "Generointi epäonnistui. Yritä uudelleen.",
         });
         controller.close();
+        logDone();
       }
     },
   });

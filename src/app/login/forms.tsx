@@ -82,7 +82,7 @@ export function AuthForms({ turnstileSiteKey }: { turnstileSiteKey: string }) {
                 <input
                   name="name"
                   type="text"
-                  placeholder="Esim. Ada Lovelace"
+                  placeholder="Esim. Anna Asiakas"
                   className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:border-slate-900 focus:outline-none"
                 />
               </div>
